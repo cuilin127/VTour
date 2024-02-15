@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+        body{
+            text-align:center;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Insert title here</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="../">VTour Admin</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a href="/addHousePage">Add House</a></li>
+            <li><a href="/viewHousesPage">View Houses</a></li>
+        </ul>
+    </div>
+</nav>
+<form action="#" th:action="@{/addHouse}" th:object="${house}">
+
+    Address <input type="text" th:field="*{address}" /> <br>
+    City <input type="text" th:field="*{city}" /> <br>
+    Province <input type="text" th:field="*{province}" /> <br>
+    Post Code <input type="text" th:field="*{postCode}" /> <br>
+    Sale Type <input type="text" th:field="*{saleType}" /> <br>
+    Matterport Url <input type="text" th:field="*{matterPortUrl}" /> <br>
+    Floor Plan Url <input type="text" th:field="*{floorPlanUrl}" /> <br>
+
+    <input type="submit" value="Add House" /> <br>
+</form>
+</body>
+</html>

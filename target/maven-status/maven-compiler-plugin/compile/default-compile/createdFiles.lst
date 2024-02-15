@@ -1,0 +1,10 @@
+com\example\vtour\model\AddPhotoDto.class
+com\example\vtour\model\Picture.class
+com\example\vtour\model\House$HouseBuilder.class
+com\example\vtour\model\AddPhotoDto$AddPhotoDtoBuilder.class
+com\example\vtour\repo\PictureRepo.class
+com\example\vtour\VTourApplication.class
+com\example\vtour\repo\HouseRepo.class
+com\example\vtour\model\House.class
+com\example\vtour\controllers\HomeController.class
+com\example\vtour\model\Picture$PictureBuilder.class
