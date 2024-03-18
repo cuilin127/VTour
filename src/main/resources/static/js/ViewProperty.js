@@ -4,10 +4,19 @@ let slideshowInterval;
 
 // Initially, show the first slide
 showSlide(0);
+document.addEventListener('DOMContentLoaded', function() {
+    // Show the loading indicator as soon as the DOM is ready
+    document.getElementById('loadingIndicator').style.display = 'flex';
 
+    // Hide the loading indicator and show the content after 2 seconds
+    setTimeout(function() {
+        document.getElementById('loadingIndicator').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+    }, 2000);
+});
 document.getElementById('view-all').addEventListener('click', function() {
-    var wrappers = document.querySelectorAll('.image-wrapper');
-    for (var i = 0; i < wrappers.length; i++) {
+    const wrappers = document.querySelectorAll('.image-wrapper');
+    for (let i = 0; i < wrappers.length; i++) {
         wrappers[i].style.display = 'block';
     }
     this.style.display = 'none';
@@ -31,15 +40,16 @@ function prevSlide() {
 }
 
 function togglePlay() {
+    let audio;
     if (playing) {
         clearInterval(slideshowInterval);
         document.getElementById('play').textContent = 'Play';
-        var audio = document.getElementById("myAudio");
+        audio = document.getElementById("myAudio");
         audio.pause();
     } else {
         slideshowInterval = setInterval(nextSlide, 2000); // 2 seconds per slide
         document.getElementById('play').textContent = 'Pause';
-        var audio = document.getElementById("myAudio");
+        audio = document.getElementById("myAudio");
         audio.play();
     }
     playing = !playing;

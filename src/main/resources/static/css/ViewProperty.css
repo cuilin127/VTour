@@ -3,6 +3,33 @@ body {
     margin: 0;
     padding-top: 70px
 }
+#loadingIndicator {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 h1 {
     font-weight: bold;
 }
@@ -145,7 +172,8 @@ h1 {
     position: relative;
     max-width: 90%;
     margin: auto;
-    padding: auto;
+    padding: 10px;
+    border: 1px solid black;
 }
 
 .slides {
@@ -159,25 +187,32 @@ h1 {
 }
 
 .controls {
+    border-top: 1px solid black;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
     margin-top: 10px;
+    padding-top: 10px;
 }
-.player-container{
-    padding: 10px;
-}
+
 .player-container .title{
     text-align: center;
 }
 #google-map {
     text-align: center;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+
+}
+#map-view {
+    border: 1px solid black;
 }
 #google-map iframe {
     width: 100%;
     height: 450px;
-    border: 0;
+    border: 1px solid black;
 }
 
 #details {
@@ -215,7 +250,7 @@ button {
     height: 100%;
 }
 .button-1 {
-    background-color: #EA4C89;
+    background-color: rgba(10, 10, 10, 0.82);
     border-radius: 8px;
     border-style: none;
     box-sizing: border-box;
@@ -244,3 +279,19 @@ button {
 .button-1:hover, .button-1:focus {
     background-color: #F082AC;
 }
+
+#insights {
+    text-align: center;
+}
+
+.footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #f2f2f2; /* Light grey background */
+    color: #666; /* Dark grey text */
+    font-size: 14px;
+    bottom: 0;
+    width: 100%;
+    position: relative;
+}
+

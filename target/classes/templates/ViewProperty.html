@@ -2,9 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Expires" content="0"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Latest compiled and minified CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -16,119 +16,139 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
+<div id="loadingIndicator" style="display: none;">
+    <!-- You can customize the inner content of this div to change the loading indicator's appearance -->
+    <div class="loader"></div>
+</div>
+<div id="content">
+    <nav class="navbar">
+        <section id="address">
+            <h1 th:text="${house.address}"></h1>
+        </section>
+        <button id="menu-button" onclick="toggleMenu()">☰</button>
+        <ul class="nav-items" id="nav-list">
+            <li><a href="#player-container-title">SLIDESHOW</a></li>
+            <li th:if="${!(house.floorPlanUrl == null || house.floorPlanUrl.isEmpty())}"><a href="#matterportTitle">3D
+                TOUR</a></li>
+            <li th:if="${!(house.floorPlanUrl == null || house.floorPlanUrl.isEmpty())}"><a href="#floorPlanTitle">FLOOR
+                PLAN</a></li>
+            <li><a href="#image-grid-title">PHOTOS</a></li>
+            <li><a href="#details">DETAILS</a></li>
+            <li><a href="#google-map">MAP</a></li>
+        </ul>
+    </nav>
 
-<nav class="navbar">
-    <section id="address">
-        <h1 th:text="${house.address}"></h1>
+    <section id="player-container-title">
+        <div class="title">
+            <h1>Slideshow
+            </h1>
+        </div>
     </section>
-    <button id="menu-button" onclick="toggleMenu()">☰</button>
-    <ul class="nav-items" id="nav-list">
-        <li><a href="#player-container-title">SLIDESHOW</a></li>
-        <li th:if="${house.matterPortUrl != null}"><a href="#matterportTitle">3D TOUR</a></li>
-        <li th:if="${house.floorPlanUrl != null}"><a href="#floorPlanTitle">FLOOR PLAN</a></li>
-        <li><a href="#image-grid-title">PHOTOS</a></li>
-        <li><a href="#details">DETAILS</a></li>
-        <li><a href="#google-map">MAP</a></li>
-    </ul>
-</nav>
-<h1>TEMP</h1>
-<img src="https://drive.google.com/thumbnail?id=0Bzgk4zncCwI7aDZCSHY4YU0zNUF&sz=4000">
+    <section class="player-container">
+        <div class="slides">
+            <img th:each="p:${house.pictures}" th:src="${p.url}" alt="Image 1" class="slide">
+            <!-- ... Add more slides as needed ... -->
+        </div>
+        <div class="controls">
+            <button class="button-1" id="prev" onclick="prevSlide()">❮ Prev</button>
+            <button class="button-1" id="play" onclick="togglePlay()">Play</button>
+            <button class="button-1" id="next" onclick="nextSlide()">Next ❯</button>
+        </div>
+    </section>
+    <audio id="myAudio">
+        <source src="/assets/BGM1.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <section th:if="${!(house.matterPortUrl == null || house.matterPortUrl.isEmpty())}">
+        <div id="matterportTitle">
+            <h1>3D Tour</h1>
+        </div>
+        <div class="matterport-container">
+            <iframe th:src="${house.matterPortUrl}" allowfullscreen></iframe>
+        </div>
+    </section>
+    <section th:if="${!(house.floorPlanUrl == null || house.floorPlanUrl.isEmpty())}">
+        <div id="floorPlanTitle">
+            <h1>Floor Plan</h1>
+        </div>
+        <div id="floorPlanContent">
+            <img th:src="${house.floorPlanUrl}" width="80%">
+        </div>
+    </section>
 
-<section id="player-container-title">
-    <div class="title">
-        <h1>Slideshow
-        </h1>
-    </div>
-</section>
-<section class="player-container">
-    <div class="slides">
-        <img th:each="p:${house.pictures}" th:src="${p.url}" alt="Image 1" class="slide">
-        <!-- ... Add more slides as needed ... -->
-    </div>
-    <div class="controls">
-        <button class="button-1" id="prev" onclick="prevSlide()">❮ Prev</button>
-        <button class="button-1" id="play" onclick="togglePlay()">Play</button>
-        <button class="button-1" id="next" onclick="nextSlide()">Next ❯</button>
-    </div>
-</section>
-<audio id="myAudio">
-    <source src="https://drive.google.com/uc?export=view&id=1BJCPT9w-B-qJCIC9F0v9X3MhyozZPW0D" type="audio/mpeg">
-    Your browser does not support the audio element.
-</audio>
-<section th:if="${!(house.matterPortUrl == null || house.matterPortUrl.isEmpty())}">
-    <div id="matterportTitle">
-        <h1>3D Tour</h1>
-    </div>
-    <div class="matterport-container" >
-        <iframe th:src="${house.matterPortUrl}"  allowfullscreen></iframe>
-    </div>
-</section>
-<section th:if="${!(house.floorPlanUrl == null || house.floorPlanUrl.isEmpty())}" >
-    <div id="floorPlanTitle">
-        <h1>Floor Plan</h1>
-    </div>
-    <div id="floorPlanContent">
-        <img th:src="${house.floorPlanUrl}" width="80%">
-    </div>
-</section>
+    <section id="image-grid-title">
+        <h1>Photo Tour</h1>
+    </section>
+    <section id="image-grid">
+        <div class="image-wrapper" data-id="1" th:each="p:${house.pictures}">
+            <img th:src="${p.url}">
+        </div>
+        <!-- Repeat for other images -->
+    </section>
+    <section id="view-all-button">
+        <button id="view-all">View All</button>
+    </section>
+    <section id="details">
+        <h1>Property Information</h1>
+        <ul class="list row">
+            <li class="col-12 col-lg-6">
+                <div class="row wrapper">
+                    <div class="col-12 col-md-5 text-center text-md-left">Address</div>
+                    <div class="col-12 col-md-7 text-center text-md-left"><strong th:text="${house.address}"></strong>
+                    </div>
+                </div>
+            </li>
+            <li class="col-12 col-lg-6">
+                <div class="row wrapper">
+                    <div class="col-12 col-md-5 text-center text-md-left">City</div>
+                    <div class="col-12 col-md-7 text-center text-md-left"><strong th:text="${house.city}"></strong>
+                    </div>
+                </div>
+            </li>
+            <li class="col-12 col-lg-6">
+                <div class="row wrapper">
+                    <div class="col-12 col-md-5 text-center text-md-left">Post Code</div>
+                    <div class="col-12 col-md-7 text-center text-md-left"><strong th:text="${house.postCode}"></strong>
+                    </div>
+                </div>
+            </li>
+            <li class="col-12 col-lg-6">
+                <div class="row wrapper">
+                    <div class="col-12 col-md-5 text-center text-md-left">Province</div>
+                    <div class="col-12 col-md-7 text-center text-md-left"><strong th:text="${house.province}"></strong>
+                    </div>
+                </div>
+            </li>
+            <li class="col-12 col-lg-6">
+                <div class="row wrapper">
+                    <div class="col-12 col-md-5 text-center text-md-left">Deal Category</div>
+                    <div class="col-12 col-md-7 text-center text-md-left"><strong th:text="${house.saleType}"></strong>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </section>
 
-<section id="image-grid-title">
-    <h1>Photo Tour</h1>
-</section>
-<section id="image-grid" >
-    <div class="image-wrapper" data-id="1" th:each="p:${house.pictures}">
-        <img th:src="${p.url}">
-    </div>
-    <!-- Repeat for other images -->
-</section>
-<section id="view-all-button">
-    <button id="view-all">View All</button>
-</section>
-<section id="details">
-    <h1>Property Information</h1>
-    <ul class="list row">
-        <li class="col-12 col-lg-6">
-            <div class="row wrapper">
-                <div class="col-12 col-md-5 text-center text-md-left">Address</div>
-                <div class="col-12 col-md-7 text-center text-md-left"><strong th:text="${house.address}"></strong></div>
-            </div>
-        </li>
-        <li class="col-12 col-lg-6">
-            <div class="row wrapper">
-                <div class="col-12 col-md-5 text-center text-md-left">City</div>
-                <div class="col-12 col-md-7 text-center text-md-left"><strong th:text="${house.city}"></strong></div>
-            </div>
-        </li>
-        <li class="col-12 col-lg-6">
-            <div class="row wrapper">
-                <div class="col-12 col-md-5 text-center text-md-left">Post Code</div>
-                <div class="col-12 col-md-7 text-center text-md-left"><strong th:text="${house.postCode}"></strong></div>
-            </div>
-        </li>
-        <li class="col-12 col-lg-6">
-            <div class="row wrapper">
-                <div class="col-12 col-md-5 text-center text-md-left">Province</div>
-                <div class="col-12 col-md-7 text-center text-md-left"><strong th:text="${house.province}"></strong></div>
-            </div>
-        </li>
-        <li class="col-12 col-lg-6">
-            <div class="row wrapper">
-                <div class="col-12 col-md-5 text-center text-md-left">Deal Category</div>
-                <div class="col-12 col-md-7 text-center text-md-left"><strong th:text="${house.saleType}"></strong></div>
-            </div>
-        </li>
-    </ul>
-</section>
+    <section id="google-map">
+        <h1>Map View</h1>
+        <!-- Replace with your Google Maps Embed code -->
+        <div id="map-view">
+            <iframe th:src="${house.getGoogleMapUrl()}" width="600" height="450" style="border:0;" allowfullscreen=""
+                    loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
 
-<section id="google-map">
-    <h1>Map View</h1>
-    <!-- Replace with your Google Maps Embed code -->
-    <iframe th:src="${house.getGoogleMapUrl()}" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-</section>
+    </section>
 
+    <section id="insights" style="display: none">
+        <iframe src="https://app.hoodq.com/package/54dcd43c-ef02-4a52-b193-c36b927f9e50/highlights" width="90%"
+                height="500px" style="border:1px solid black;"></iframe>
+    </section>
 
+    <footer class="footer">
+        © 2024 All Rights Reserved by Rev Studio.
+    </footer>
 
-<script src="/js/ViewProperty.js"></script>
-
+    <script src="/js/ViewProperty.js?v=1.0"></script>
+</div>
 </body>
 </html>
