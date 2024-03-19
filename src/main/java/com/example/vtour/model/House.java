@@ -26,6 +26,9 @@ public class House {
     String matterPortUrl;
     String floorPlanUrl;
 
+    @OneToOne(cascade=CascadeType.ALL)
+    private AddressReport addressReport = new AddressReport();
+
     @OneToMany(cascade=CascadeType.ALL)
     private List<Picture> pictures = new ArrayList<Picture>();
 
