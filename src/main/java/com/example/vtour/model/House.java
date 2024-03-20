@@ -25,7 +25,7 @@ public class House {
     String saleType;
     String matterPortUrl;
     String floorPlanUrl;
-
+    String hoodQUrl;
     @OneToOne(cascade=CascadeType.ALL)
     private AddressReport addressReport = new AddressReport();
 
