@@ -27,7 +27,7 @@
 <form action="#" th:action="@{/doAddPhoto}" th:object="${addPhotoDto}">
 
     <input type="hidden" th:field="*{houseId}" />
-    File ID String <input type="text" th:field="*{imageIds}" /> <br>
+    DropBox Folder URL <input type="text" th:field="*{dropBoxUrl}" /> <br>
 
     <input type="submit" value="Add Photo" /> <br>
 </form>

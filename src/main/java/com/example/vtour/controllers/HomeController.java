@@ -5,6 +5,7 @@ import com.example.vtour.model.House;
 import com.example.vtour.model.Picture;
 import com.example.vtour.repo.HouseRepo;
 import com.example.vtour.repo.PictureRepo;
+import com.example.vtour.services.DropBoxService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,15 +16,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 public class HomeController {
     private final HouseRepo hrp;
     private final PictureRepo prp;
-
-    public HomeController(HouseRepo hrp, PictureRepo prp) {
+    private final DropBoxService dropBoxService;
+    public HomeController(HouseRepo hrp, PictureRepo prp, DropBoxService dropBoxService) {
         this.hrp = hrp;
         this.prp = prp;
+        this.dropBoxService = dropBoxService;
     }
 
     @GetMapping("/")
@@ -114,18 +118,20 @@ public class HomeController {
                 return "redirect:https://revstudio.ca/";
             }
 
-            String imageIds = dto.getImageIds();
-            String[] items = imageIds.split(",");
+            String dropBoxUrl = dto.getDropBoxUrl();
             House tempHouse = hrp.findById(dto.getHouseId());
+            List<String> imageUrls = dropBoxService.getSharedLinksForFolder(dropBoxUrl);
             tempHouse.getPictures().clear();
-            for (int i = 0; i < items.length; i++) {
-                items[i] = items[i].trim();
-                Picture pic = Picture.builder().fileId(items[i]).build();
-                pic.setHouse(tempHouse);
-                pic.setUrl("https://drive.google.com/thumbnail?id="+pic.getFileId()+"&sz=s4000");
-                tempHouse.getPictures().add(pic);
-                prp.save(pic);
+            List<Picture> tempPics = new ArrayList<>();
+            for (int i = 0; i < imageUrls.size(); i++) {
+
+                Picture tempPic = new Picture();
+                tempPic.setHouse(tempHouse);
+                tempPic.setUrl(imageUrls.get(i));
+                tempHouse.getPictures().add(tempPic);
+                tempPics.add(tempPic);
             }
+            prp.saveAll(tempPics);
             hrp.save(tempHouse);
 
             model.addAttribute("houses", hrp.findAll());

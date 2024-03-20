@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @Data
 public class AddPhotoDto {
     private int houseId;
-    private String imageIds;
+    private String dropBoxUrl;
 }
