@@ -1,10 +1,13 @@
 package com.example.vtour.controllers;
 
-import com.example.vtour.model.AddPhotoDto;
-import com.example.vtour.model.House;
-import com.example.vtour.model.Picture;
+import com.example.vtour.model.*;
+import com.example.vtour.repo.AddressReportRepo;
 import com.example.vtour.repo.HouseRepo;
 import com.example.vtour.repo.PictureRepo;
+import com.example.vtour.repo.PublicInfraRepo;
+import com.example.vtour.services.LocationService;
+import com.google.maps.model.PlacesSearchResponse;
+import com.google.maps.model.PlacesSearchResult;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,15 +18,23 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class HomeController {
     private final HouseRepo hrp;
     private final PictureRepo prp;
-
-    public HomeController(HouseRepo hrp, PictureRepo prp) {
+    private final AddressReportRepo arp;
+    private final PublicInfraRepo pirp;
+    private final LocationService locationService;
+    public HomeController(HouseRepo hrp, PictureRepo prp, AddressReportRepo arp, PublicInfraRepo pirp, LocationService locationService) {
         this.hrp = hrp;
         this.prp = prp;
+        this.arp = arp;
+        this.pirp = pirp;
+        this.locationService = locationService;
     }
 
     @GetMapping("/")
@@ -66,6 +77,47 @@ public class HomeController {
                 return "redirect:https://revstudio.ca/";
             }
             house.setFullAddress(house.getAddress()+", "+house.getCity()+", "+house.getProvince()+", "+house.getPostCode());
+            AddressReport tempReport = new AddressReport();
+            //Work for Address report
+            //Add Schools
+            PlacesSearchResponse tempSchoolSearchResult = locationService.findSchool(house.getAddress());
+            for(PlacesSearchResult temp:tempSchoolSearchResult.results){
+                PublicInfra tempInfra = new PublicInfra();
+                tempInfra.setName(temp.name);
+                tempInfra.setType("SCHOOL");
+                tempInfra.setAddress(locationService.getFormattedAddress(temp.placeId));
+                tempInfra.setDistance(locationService.getDistance(house.getFullAddress(),tempInfra.getAddress()));
+                tempInfra.setUrl(locationService.getPlaceWebsite(temp.placeId));
+                pirp.save(tempInfra);
+                tempReport.getInfraList().add(tempInfra);
+            }
+            //Add park
+            PlacesSearchResponse tempParkSearchResult = locationService.findParks(house.getAddress());
+            for(PlacesSearchResult temp:tempParkSearchResult.results){
+                PublicInfra tempInfra = new PublicInfra();
+                tempInfra.setName(temp.name);
+                tempInfra.setType("PARK");
+                tempInfra.setAddress(locationService.getFormattedAddress(temp.placeId));
+                tempInfra.setDistance(locationService.getDistance(house.getFullAddress(),tempInfra.getAddress()));
+                tempInfra.setUrl(locationService.getPlaceWebsite(temp.placeId));
+                pirp.save(tempInfra);
+                tempReport.getInfraList().add(tempInfra);
+            }
+            //Add Transits
+            PlacesSearchResponse tempTransitSearchResult = locationService.findTransits(house.getAddress());
+            for(PlacesSearchResult temp:tempTransitSearchResult.results){
+                PublicInfra tempInfra = new PublicInfra();
+                tempInfra.setName(temp.name);
+                tempInfra.setType("TRANSIT");
+                tempInfra.setAddress(locationService.getFormattedAddress(temp.placeId));
+                tempInfra.setDistance(locationService.getDistance(house.getFullAddress(),tempInfra.getAddress()));
+                tempInfra.setUrl(locationService.getPlaceWebsite(temp.placeId));
+                pirp.save(tempInfra);
+                tempReport.getInfraList().add(tempInfra);
+            }
+
+            arp.save(tempReport);
+            house.setAddressReport(tempReport);
             hrp.save(house);
             model.addAttribute("houses", hrp.findAll());
             return "ViewHouses";
@@ -141,6 +193,13 @@ public class HomeController {
         House tempHouse = hrp.findById(id);
 
         model.addAttribute("house", tempHouse);
+
+        List<PublicInfra> schools = tempHouse.getAddressReport().getInfraList().stream().filter(s -> s.getType().equals("SCHOOL")).collect(Collectors.toList());
+        List<PublicInfra> parks = tempHouse.getAddressReport().getInfraList().stream().filter(s -> s.getType().equals("PARK")).collect(Collectors.toList());
+        List<PublicInfra> transits = tempHouse.getAddressReport().getInfraList().stream().filter(s -> s.getType().equals("TRANSIT")).collect(Collectors.toList());
+        model.addAttribute("schools", schools);
+        model.addAttribute("parks", parks);
+        model.addAttribute("transits", transits);
         return "ViewProperty";
     }
 

@@ -21,6 +21,7 @@ public class PublicInfra {
 
     String type;
     String name;
+    String address;
     String url;
-    String distance;
+    double distance;
 }

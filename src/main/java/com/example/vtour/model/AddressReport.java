@@ -19,6 +19,6 @@ public class AddressReport {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Integer id;//Primary Key
 
-    @OneToMany(cascade=CascadeType.ALL)
+    @OneToMany(cascade=CascadeType.ALL,fetch = FetchType.EAGER)
     List<PublicInfra> infraList = new ArrayList<>();
 }
