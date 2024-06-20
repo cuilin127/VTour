@@ -3,9 +3,11 @@ package com.example.vtour.controllers;
 import com.example.vtour.model.AddPhotoDto;
 import com.example.vtour.model.House;
 import com.example.vtour.model.Picture;
+import com.example.vtour.model.SetTokenDTO;
 import com.example.vtour.repo.HouseRepo;
 import com.example.vtour.repo.PictureRepo;
 import com.example.vtour.services.DropBoxService;
+import com.example.vtour.services.DropBoxTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,22 +26,32 @@ public class HomeController {
     private final HouseRepo hrp;
     private final PictureRepo prp;
     private final DropBoxService dropBoxService;
-    public HomeController(HouseRepo hrp, PictureRepo prp, DropBoxService dropBoxService) {
+    private final DropBoxTokenService dropBoxTokenService;
+
+    private String token = null;
+    public HomeController(HouseRepo hrp, PictureRepo prp, DropBoxService dropBoxService, DropBoxTokenService dropBoxTokenService) {
         this.hrp = hrp;
         this.prp = prp;
         this.dropBoxService = dropBoxService;
+        this.dropBoxTokenService = dropBoxTokenService;
     }
 
     @GetMapping("/")
     public String goHome() {
         return "redirect:https://revstudio.ca/";
     }
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+    @GetMapping("/getCode")
+    public String printCode() {
+        //System.out.println(dropBoxTokenService.getAccessToken("EmTCYSykox0AAAAAAAACAZuLNpj0VEwq21jfenTVihA"));
+        return "redirect:https://www.dropbox.com/oauth2/authorize?client_id=uhqcpb2jg2bpzaw&response_type=code&redirect_uri=https://google.com";
+    }
     @GetMapping("/admin")
     public String goAdmin(HttpServletRequest request) {
         try{
-            if(allowAccess(request)){
-                return "redirect:https://revstudio.ca/";
-            }
             return "Admin";
         }catch (Exception ex){
             return "redirect:https://revstudio.ca/";
@@ -51,9 +63,6 @@ public class HomeController {
     public String goAddHousePage(Model model, HttpServletRequest request) {
         try{
             //Check if eligible
-            if(allowAccess(request)){
-                return "redirect:https://revstudio.ca/";
-            }
 
             model.addAttribute("house", new House());
             return "AddHouse";
@@ -66,9 +75,6 @@ public class HomeController {
     public String addHousePage(Model model, @ModelAttribute House house, HttpServletRequest request) {
         try{
             //Check if eligible
-            if(allowAccess(request)){
-                return "redirect:https://revstudio.ca/";
-            }
             house.setFullAddress(house.getAddress()+", "+house.getCity()+", "+house.getProvince()+", "+house.getPostCode());
             hrp.save(house);
             model.addAttribute("houses", hrp.findAll());
@@ -82,10 +88,6 @@ public class HomeController {
     @GetMapping("/viewHousesPage")
     public String goViewHousesPage(Model model, HttpServletRequest request) {
         try{
-            //Check if eligible
-            if(allowAccess(request)){
-                return "redirect:https://revstudio.ca/";
-            }
             model.addAttribute("houses", hrp.findAll());
             return "ViewHouses";
         }catch (Exception ex){
@@ -97,13 +99,30 @@ public class HomeController {
     public String addPhoto(@PathVariable int id, Model model, HttpServletRequest request) {
         try{
             //Check if eligible
-            if(allowAccess(request)){
-                return "redirect:https://revstudio.ca/";
-            }
+            SetTokenDTO setTokenDTO = new SetTokenDTO();
+            setTokenDTO.setHouseId(id);
+            //AddPhotoDto dto = new AddPhotoDto();
+            //dto.setHouseId(id);
+            model.addAttribute("setTokenDTO",setTokenDTO);
+            //return "AddPhoto";
+            return "SetToken";
+        }catch (Exception ex){
+            return "redirect:https://revstudio.ca/";
+        }
+    }
+    @GetMapping("/setToken")
+    public String setToken(){
+        return "SetToken";
+    }
+    @GetMapping("/doSetToken")
+    public String doSetToken(@ModelAttribute SetTokenDTO dto, Model model, HttpServletRequest request) {
+        try{
+            //Check if eligible
+            token = dropBoxTokenService.getAccessToken(dto.getAuCode());
+            AddPhotoDto addPhotoDto = new AddPhotoDto();
+            addPhotoDto.setHouseId(dto.getHouseId());
 
-            AddPhotoDto dto = new AddPhotoDto();
-            dto.setHouseId(id);
-            model.addAttribute("addPhotoDto",dto);
+            model.addAttribute("addPhotoDto", addPhotoDto);
             return "AddPhoto";
         }catch (Exception ex){
             return "redirect:https://revstudio.ca/";
@@ -114,13 +133,10 @@ public class HomeController {
     public String doAddPhoto(@ModelAttribute AddPhotoDto dto, Model model, HttpServletRequest request) {
         try{
             //Check if eligible
-            if(allowAccess(request)){
-                return "redirect:https://revstudio.ca/";
-            }
 
             String dropBoxUrl = dto.getDropBoxUrl();
             House tempHouse = hrp.findById(dto.getHouseId());
-            List<String> imageUrls = dropBoxService.getSharedLinksForFolder(dropBoxUrl);
+            List<String> imageUrls = dropBoxService.getSharedLinksForFolder(dropBoxUrl,token);
             tempHouse.getPictures().clear();
             List<Picture> tempPics = new ArrayList<>();
             for (int i = 0; i < imageUrls.size(); i++) {
@@ -148,20 +164,5 @@ public class HomeController {
 
         model.addAttribute("house", tempHouse);
         return "ViewProperty";
-    }
-
-    public boolean allowAccess(HttpServletRequest request) throws UnknownHostException {
-
-        var clientIp = request.getRemoteAddr();
-        // Allow localhost IPs
-        boolean isLocalhost = "0:0:0:0:0:0:0:1".equals(clientIp);
-
-        // Resolve the domain name to an IP address
-        InetAddress address = InetAddress.getByName("amyccmmyy.synology.me");
-        String domainIp = address.getHostAddress();
-
-        boolean isAllowedDomain = clientIp.equals(domainIp);
-
-        return !isLocalhost && !isAllowedDomain;
     }
 }
