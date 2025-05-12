@@ -14,9 +14,9 @@ import java.util.List;
 
 @Service
 public class DropBoxService {
-    private final String ACCESS_TOKEN = "sl.BxxN0a4DU4BO8x6rP0Z_WQb0eRSG4gau9i7UKg8_cjD1IrgyzAV7BMOYf31bvAN0KWinNsivzotpjSRgBVk2UhspGC9tpQyJR1X9z_iukmwNXLKHH6q8L18A7o3aJfrHfzfq3A53E2IEjqg";
 
-    public List<String> getSharedLinksForFolder(String folderPath) {
+    public List<String> getSharedLinksForFolder(String folderPath,String ACCESS_TOKEN) {
+
         DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
         DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
 
@@ -28,11 +28,15 @@ public class DropBoxService {
                 for (Metadata metadata : result.getEntries()) {
                     try {
                         List<SharedLinkMetadata> links = client.sharing().listSharedLinksBuilder().withPath(metadata.getPathLower()).start().getLinks();
-                        if (!links.isEmpty()) {
+                        if (links.isEmpty()) {
+                            // If no shared link exists, create one
+                            SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings(metadata.getPathLower());
+                            String directUrl = linkMetadata.getUrl().replace("&dl=0", "&raw=1");
+                            urls.add(directUrl);
+                        } else {
+                            // Use the existing shared link
                             String directUrl = links.get(0).getUrl().replace("&dl=0", "&raw=1");
                             urls.add(directUrl);
-
-                            System.out.println(urls.size() + ". " + directUrl);
                         }
                     } catch (CreateSharedLinkWithSettingsErrorException e) {
                         System.out.println(e.getMessage());
